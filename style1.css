@@ -1,0 +1,26 @@
+@charset "UTF-8";
+     .highlight {
+        background-color: rgba(77, 65, 104, 0.74);width: fit-content;
+        color: white;
+      }
+
+h1 {
+  color: white;
+  background-color: #bc8f8f; width: fit-content;
+}
+
+.sugoo
+    {
+    color: aliceblue;
+    background-color: blue;
+    }
+@media (max-width: 600px) {
+    .sugoo {
+      background-color: red;
+    }
+  }
+@media (min-width: 800px) {
+    .sugoo {
+        background-color: green;
+    }
+  }
