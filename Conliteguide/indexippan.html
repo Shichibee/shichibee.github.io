@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Copier</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>SSH Access Guide(Windows)</h1>
+        <!-- style="text-align: center;" -->
+    </header>
+    <div class="container">
+        <p>以下の手順に従って、MobaXtermを使用してsolにログインし、学校のPCで作成したファイルにアクセスする方法を説明します。</p>
+        <p style="color: #bd1e1e; font-weight: bold;">MobaXtermでは、Shift + Insertでコピペできます。<br>(できないときは右クリックでPasteする)</p>
+        <p style="color: #bd1e1e; font-weight: bold;">現在、バグで学籍番号を置き換えた後に任意の名前を置き換えると、学籍番号がx○○○○○○に戻ってしまいます。申し訳ありません...</p>
+        <input type="text" id="input-text2" placeholder="[x○○○○○○○]を置き換え">
+        <button id="replace-button2">置き換え</button>
+    
+        <br>x○○○○○○(英字+学籍番号)を<div id="bango-text">x○○○○○○○</div>に置き換えます。
+
+        <nav>
+            <ul>
+                <li><a href="#Solbegin">接続</a></li>
+                <li><a href="#LaTeX">LaTeX</a></li>
+                <li><a href="#Other">その他</a></li>
+                <li><a href="#Exit">終了</a></li>
+            </ul>
+        </nav>
+        
+        <section id="Solbegin">
+            <h2>Solに接続する</h2>
+            <div class="guide">
+            1. まずはこのコードをコピーする。
+            </div>
+
+
+            <div class="code-window">
+                <div class="code-header">
+                    <span>code</span>
+                    <!-- IDを追加 -->
+                    <button id="copy-button1">コードをコピーする</button>
+                </div>
+                <!-- IDを追加 -->
+<code id="code-block1">ssh -Y x○○○○○○○@sol.cc.uec.ac.jp</code>
+            </div>
+        
+            <div class="guide">
+            2.x○○○○○○○@sol.cc.uec.ac.jp's password:<br> と出てくるのでパスワードを入力。このとき、パスワードを入力しても画面には表示されないので気をつける。
+            </div>
+
+            <div class="code-window">
+                <div class="code-header">
+                    <span>code</span>
+                    <button id="copy-button2">コードをコピーする</button>
+                </div>
+<code id="code-block2">自分専用だったときはここにパスワードを書いてた</code>
+            </div>
+
+            <blockquote>
+            キーのやつはNoで良い。<br><br>
+            (これまでの作業を共有鍵?で簡単にしたいよ...!)<br>(やり方見てもできなかった)
+            </blockquote>
+
+            <div class="guide">
+                3. いつも使っているCLITディレクトリに移動する。でないといろいろめんどい。(個人の感想)
+            </div>
+            <div class="code-window">
+                <div class="code-header">
+                    <span>code</span>
+                    <button id="copy-button3">コードをコピーする</button>
+                </div>
+<code id="code-block3">cd /export/home/home1/y2024/x○○○○○○○/CLIT/</code>
+            </div>
+        </section>
+
+        <section id="LaTeX">
+        <h2>LaTeXの呪文</h2>
+
+        <!-- IDを追加 -->
+        <input type="text" id="input-text1" placeholder="[任意の名前]を置き換え">
+        <!-- IDを追加 -->
+        <button id="replace-button1">置き換え</button>
+        
+        <br>任意の名前を<div id="nini-text">任意の名前</div>に置き換えます。
+
+        <div class="guide" style="color: #bd1e1e; font-weight: bold;">
+            0. assignmentのつづりは間違えやすい!!!(自戒)
+        </div>
+
+        <div class="code-window">
+            <div class="code-header">
+                <span>code</span>
+                <button id="copy-button4">コードをコピーする</button>
+            </div>
+<code id="code-block4">assignment</code>
+        </div>
+
+        <div class="guide">
+            1. emacsを開いて内容を確認しておく
+        </div>
+
+        <div class="code-window">
+            <div class="code-header">
+                <span>code</span>
+                <button id="copy-button5">コードをコピーする</button>
+            </div>
+<code id="code-block5">emacs 任意の名前.tex &</code>
+        </div>
+
+        <div class="guide">
+            2.整形する。エラー「?」で止まったときは「x」で中止し、ソースを修正して再度やること。
+            </div>
+
+        <div class="code-window">
+            <div class="code-header">
+                <span>code</span>
+                <button id="copy-button6">コードをコピーする</button>
+            </div>
+<code id="code-block6">platex 任意の名前.tex</code>
+        </div>
+
+        <div class="guide">
+        3. PDFファイル「sample.pdf」を生成。
+            </div>
+
+        <div class="code-window">
+            <div class="code-header">
+                <span>code</span>
+                <button id="copy-button7">コードをコピーする</button>
+            </div>
+<code id="code-block7">dvipdfmx 任意の名前.dvi</code>
+        </div>
+
+        <div class="guide">
+            4. PDFをプレビュー(画面でPDF表示を確認。 ここで確認できない場合は、次項の mail コマンドで、自分宛にPDFをメール送付する)
+                </div>
+    
+            <div class="code-window">
+                <div class="code-header">
+                    <span>code</span>
+                    <button id="copy-button8">コードをコピーする</button>
+                </div>
+<code id="code-block8">evince 任意の名前.pdf &</code>
+            </div>
+
+        <div class="guide">
+            5. 生成したPDFをメール添付で自分宛に送ることができる。
+            最初の「X」は 1 語なら何でもよい。
+            
+                </div>
+
+            <div class="code-window">
+                <div class="code-header">
+                    <span>code</span>
+                    <button id="copy-button9">コードをコピーする</button>
+                </div>
+<code id="code-block9">echo X | mail -s 'CL-file' -A 任意の名前.pdf x○○○○○○○@gl.cc.uec.ac.jp </code>
+            </div>
+            <blockquote style="font-size: 10px;">
+            ※完全自分用メモ※<br>
+            自分のPCのVScodeで書くときにコンパイルが上手くいかなかったら、最初の<br>
+            \documentclass[11pt,a4j]{jarticle}を、<br>
+            \documentclass[11pt,a4j]{jsarticle}にするとコンパイルがうまくいくかも。ただ、このまま出力したPDFで出すとmoodle的にだめなので、solで作ったものにコピペしてPDF出力したものを出す。
+            <br>(念の為、jarticlに戻して出力するほうが良き？？？)
+            </blockquote>
+        </section>
+
+        <section id="Other">
+            <h2>その他便利コマンド</h2>
+        <h3>Emacsの起動</h3>
+            <div class="code-window">
+                <div class="code-header">
+                    <span>code</span>
+                    <button id="copy-button10">コードをコピーする</button>
+                </div>
+<code id="code-block10">emacs 任意 &</code>
+            </div>
+
+            <h3>PIDとか見るとき</h3>
+                <div class="code-window">
+                    <div class="code-header">
+                        <span>code</span>
+                        <button id="copy-button11">コードをコピーする</button>
+                    </div>
+<code id="code-block11">ps -f -u x○○○○○○○</code>
+                </div>
+
+                <h3>gimp(画像表示ソフト)(.png　.pbm　.jpg　とか?)</h3>
+                <div class="code-window">
+                    <div class="code-header">
+                        <span>code</span>
+                        <button id="copy-button12">コードをコピーする</button>
+                    </div>
+<code id="code-block12">gimp 任意 &</code>
+                    </pre>
+                </div>
+
+                <h3>今いるディレクトリの上に移動する</h3>
+                <div class="code-window">
+                    <div class="code-header">
+                        <span>code</span>
+                        <button id="copy-button13">コードをコピーする</button>
+                    </div>
+<code id="code-block13">cd ../</code>
+                    </pre>
+                </div>
+        
+                <h3>ファイル削除</h3>
+                <div class="code-window">
+                    <div class="code-header">
+                        <span>code</span>
+                        <button id="copy-button14">コードをコピーする</button>
+                    </div>
+<code id="code-block14">rm 任意</code>
+                    </pre>
+                </div>
+        </section>
+        <section id="Exit">
+        <div class="guide">
+        利用が終了したら、solとの接続を終了します
+        <div style="color: #bd1e1e; font-weight: bold;"> (下のコードをコピーしなくても右上の赤い電源ボタンで終わることができます)</div>
+        <div style="color: #9a9a9a; font-size: 0.6rem;">締めにちょうどいいと思って...</div>
+        </div>
+
+            <div class="code-window">
+                <div class="code-header">
+                    <span>code</span>
+                    <button id="copy-button15">コードをコピーする</button>
+                </div>
+<code id="code-block15">$ exit</code>
+            </div>
+        </section>
+    </div>
+    
+    <div id="alert" class="alert">コードがコピーされました！</div>
+
+    <footer>
+        <p>&copy; 2024 700 million yen and ChatGPT</p>
+    </footer>
+
+    <!-- <script src="script.js"></script> -->
+    <script src="script3.js"></script>
+</body>
+</html>
