@@ -23,6 +23,13 @@ header {
 nav ul {
     list-style: none;
     padding: 0;
+    text-align: center;
+    transition: color 0.5s;
+}
+
+a:hover {
+    transition: color 0.5s;
+    color: #0056b3;
 }
 
 nav ul li {
@@ -181,4 +188,9 @@ footer {
 .social-button img.x-icon {
     width: 16px; /* 特定のアイコンの幅 */
     height: 16px; /* 特定のアイコンの高さ */
+}
+
+.social-button img.scr-icon {
+    width: 16px; /* 特定のアイコンの幅 */
+    height: 20px; /* 特定のアイコンの高さ */
 }
