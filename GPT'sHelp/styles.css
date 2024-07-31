@@ -34,7 +34,7 @@ a:hover {
 
 nav ul li {
     display: inline;
-    margin-right: 10px;
+    margin-right: 20px;
 }
 
 a {
@@ -193,4 +193,8 @@ footer {
 .social-button img.scr-icon {
     width: 16px; /* 特定のアイコンの幅 */
     height: 20px; /* 特定のアイコンの高さ */
+}
+
+.scr-frame{
+    align-items: center;
 }
