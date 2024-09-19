@@ -17,6 +17,7 @@ header {
     padding: 20px 20px; /* パディングを追加 */
     box-sizing: border-box; /* パディングを含めて要素のサイズを計算 */
     z-index: 1000; /* ヘッダーの重なり順を上げる */
+    
   }
   
   .titlename {
@@ -62,7 +63,12 @@ main {
     padding: 30px;
     padding-top: 75px; /* ヘッダー固定のための余白を追加 */
     box-sizing: border-box; /* パディングを含めて要素のサイズを計算 */
+    align-items: center;     /* 縦方向の中央揃え */
+    flex-direction: column;  /* 内容を縦に並べる */
+    max-width:800px ;
+    margin: 0 auto; /* 中央寄せ */
 }
+
   
   @media (max-width: 670px) {
     header {
@@ -104,10 +110,21 @@ main {
     }
   }
 
+main h1{
+    font-size: 1.8rem;
+    display: flex; /* フレックスレイアウトを指定 */
+    width: 100%;
+    padding: 0;
+}
+
+h2{
+    text-decoration: underline;
+    font-size: 2rem;
+}
 
 a:hover {
-    transition: color 0.3s;
     color: #0056b3;
+    font-weight: 600;
 }
 
 .url {
@@ -221,19 +238,22 @@ footer {
 
 .social-buttons {
     display: flex;
-    /* justify-content: center; */
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 20px;
     margin-top: 20px; /* タイムラインからの余白 */
 }
 
+
 .social-button {
     display: flex;
     align-items: center;
-    padding: 10px 20px;
+    padding: 15px 30px;
     border: 1px solid #ccc;
     border-radius: 8px;
     text-decoration: none;
     color: #333;
+    font-size: 1.2rem;
     transition: background-color 0.3s, box-shadow 0.3s;
 }
 
@@ -259,6 +279,33 @@ footer {
     height: 20px; /* 特定のアイコンの高さ */
 }
 
-.scr-frame{
+
+.scr-container {
+    max-width: 600px; /* 最大幅を制限 */
+    max-height: 497px;
+    width: 100%;
+    position: relative;
+    padding-bottom: 82.88%; /* アスペクト比によって調整してね*/
+    height: 0;
     align-items: center;
+}
+
+.scr-container iframe {
+    max-width: 600px; /* 最大幅を制限 */
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.kwsk{
+    font-size: 1.2rem;
+    font-weight: 900;
+    width: fit-content;
+    padding: 0 20px;
+    background-color: #9abadd;
+    border-radius: 10px;
 }
