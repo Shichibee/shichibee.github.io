@@ -38,22 +38,32 @@ header {
   }
   
   .navbar ul li {
-    margin-left: 20px;
+     margin-left: 10px; 
+     margin-right: 10px; 
   }
   
   .navbar ul li a {
     color: #fff;
     text-decoration: none;
+    padding-left: 10px;
+    padding-right: 10px;
   }
   
   .navbar ul li a:hover {
     opacity: 0.5;
     font-weight: 0;
+    font-weight: normal;
   }
   
+  .kugiri{
+    padding: 10px 0;
+    border-left: 2px solid #062547;
+  }
+
+
   .hilight {
     background-color: #062547;
-    border-radius: 10px; /* 角を丸くする */
+    border-radius: 8px; /* 角を丸くする */
   }
 
 main {
