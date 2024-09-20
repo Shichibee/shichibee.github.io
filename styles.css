@@ -44,11 +44,11 @@ header {
   .navbar ul li a {
     color: #fff;
     text-decoration: none;
-    padding: 20px;
   }
   
   .navbar ul li a:hover {
     opacity: 0.5;
+    font-weight: 0;
   }
   
   .hilight {
@@ -368,6 +368,7 @@ footer {
   display: flex;
   align-items: center; /* ボタン内のテキスト（矢印）を垂直中央に配置 */
   justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .prev {
@@ -395,6 +396,7 @@ footer {
   display: inline-block;
   cursor: pointer;
   transition: background-color 0.6s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
 .dot.active {
