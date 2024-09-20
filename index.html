@@ -25,22 +25,26 @@
         <section id="about">
             <h1>Shichibeeです。ゲーム作りたくて生きてます。</h1>
             <div class="social-buttons">
-                <a href="https://x.com/joyjoy_7shichi7" class="social-button">
+                <button type="button" onclick= "location.href='https://x.com/joyjoy_7shichi7'" class="social-button">
                     <img src="..\Images\xlogo.png" alt="X-UEC" class = x-icon>
                     X(UEC)
-                </a>
-                <a href="https://scratch.mit.edu/users/jimimi/" class="social-button">
+                </button>
+
+                <button type="button" onclick= "location.href='https://scratch.mit.edu/users/jimimi/'" class="social-button">
                     <img src="..\Images\Scratch.logo.S.png" alt="Scratch" class = scr-icon>
                     Scratch
-                </a>
-                <a href="https://github.com/Shichibee" class="social-button">
+                </button>
+
+                <button type="button" onclick= "location.href='https://github.com/Shichibee'" class="social-button">
                     <img src="https://img.icons8.com/ios-glyphs/30/000000/github.png" alt="GitHub">
                     GitHub
-                </a>
-                <!-- <a href="#account" class="social-button">
+                </button>
+
+                <!-- <button type="button" onclick= "location.href=''" class="social-button">
                     <img src="https://img.icons8.com/ios-filled/50/000000/new-post.png" alt="Mail">
                     Mail
-                </a> -->
+                </button> -->
+
             </div>
             
             <h2>About</h2>
@@ -139,12 +143,54 @@
         <section id="works">
             <h2>Works</h2>
             <div class="kwsk">☆詳しくは<a class = url href="">こちら!</a></div>
- 
+
+            <div class="slider">
+                <div class="slides">
+                    <!-- スライド1 -->
+                    <div class="slide active">
+                        <img src="./Images/Slide1.png" alt="Slide1">
+                    </div>
+                    <!-- スライド2 -->
+                    <div class="slide">
+                        <img src="./Images/Slide2.png" alt="Slide2">
+                    </div>
+                    <!-- スライド3 -->
+                    <div class="slide">
+                        <img src="./Images/Slide3.png" alt="Slide3">
+                    </div>
+                    <!-- スライド4 -->
+                    <div class="slide">
+                        <img src="./Images/Slide4.png" alt="Slide4">
+                    </div>
+                    <!-- スライド5 -->
+                    <div class="slide">
+                        <img src="./Images/Slide5.png" alt="Slide5">
+                    </div>
+                    
+                </div>
+                <!-- 矢印ボタン -->
+                <button class="prev">&#10094;</button>
+                <button class="next">&#10095;</button>
+                <!-- ページインジケーター -->
+                <div class="indicators">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>
 
         </section>
+
+        
+
+
     </main>
     <footer>
         <p>&copy; 2024 700 million yen and ChatGPT</p>
     </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>

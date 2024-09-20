@@ -257,8 +257,11 @@ footer {
     border-radius: 8px;
     text-decoration: none;
     color: #333;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     font-size: 1.2rem;
     transition: background-color 0.3s, box-shadow 0.3s;
+
 }
 
 .social-button img {
@@ -310,6 +313,90 @@ footer {
     font-weight: 900;
     width: fit-content;
     padding: 0 20px;
-    background-color: #b7b064;
+    color: #8b0000;
+    /* background-color: #b7b064; */
     border-radius: 5px;
+}
+
+.kwsk a{
+  color: #8b0000;
+}
+
+.kwsk a:hover {
+  color: #0056b3;
+  font-weight: 600;
+}
+
+
+
+/* スライダーのスタイル */
+.slider {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  max-height: 400px;
+  margin: auto;
+  overflow: hidden;
+}
+
+.slides {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.slide {
+  min-width: 100%;
+  box-sizing: border-box;
+}
+
+.slide img {
+  width: 100%; /* 画像の幅をスライダーに合わせて100%に */
+  height: 100%; /* 画像の高さもスライダーに合わせる */
+  object-fit: cover; /* 画像がスライダーの枠内に収まるよう調整 */
+}
+
+.prev, .next {
+  position: absolute;
+  top: 0; /* ボタンの上端をスライドの上端に揃える */
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 0 20px; /* 横方向のパディングを調整 */
+  cursor: pointer;
+  z-index: 1;
+  height: 100%; /* スライドの高さと一致させる */
+  display: flex;
+  align-items: center; /* ボタン内のテキスト（矢印）を垂直中央に配置 */
+  justify-content: center;
+}
+
+.prev {
+  left: 0px;
+}
+
+.next {
+  right: 0px;
+}
+
+/* インジケーターのスタイル */
+.indicators {
+  text-align: center;
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+}
+
+.dot {
+  height: 15px;
+  width: 15px;
+  margin: 0 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+  transition: background-color 0.6s ease;
+}
+
+.dot.active {
+  background-color: white;
 }
