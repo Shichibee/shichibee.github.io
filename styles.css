@@ -343,32 +343,36 @@ footer {
 .slider {
   position: relative;
   width: 100%;
-  max-width: 600px;
-  max-height: 450px;
+  max-width: 400px;
+  max-height: 300px;
   margin: auto;
   overflow: hidden;
 }
+
+.slide {
+  min-width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  width: 100%; /* スライドの幅を100%に */
+  padding-top: 75%; /*比率を維持（高さを設定） */
+  
+}
+
+.slide img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* 比率を維持して収める */
+}
+
 
 .slides {
   display: flex;
   transition: transform 0.5s ease;
 }
 
-.slide {
-  min-width: 100%;
-  box-sizing: border-box;
-}
-
-.slide.active {
-  opacity: 1; /* 表示されるスライドにのみ説明文を表示 */
-}
-
-.slide img {
-  width: 100%; /* 画像の幅をスライダーに合わせて100%に */
-  height: 100%; /* 画像の高さもスライダーに合わせる */
-  object-fit: cover; /* 画像がスライダーの枠内に収まるよう調整 */
-  height: 350px; /* 画像の高さを指定してスペースを確保 */
-}
 
 .prev, .next {
   position: absolute;
@@ -398,7 +402,7 @@ footer {
 .indicators {
   text-align: center;
   position: absolute;
-  bottom: 60px;
+  bottom: 30px;
   width: 100%;
 }
 
@@ -426,7 +430,7 @@ footer {
   font-size: 16px;
   opacity: 1;
   display: none; /* 初期状態ではキャプションは表示しない */
-}
+} 
 
 .slide.active .caption {
   display: block; /* アクティブなスライドのキャプションを表示 */

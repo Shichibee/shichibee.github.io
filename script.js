@@ -77,8 +77,9 @@ dots.forEach((dot, index) => {
     });
 });
 
-// 初期スライドにactiveクラスを付与
-slides[0].classList.add('active');
+// // 初期スライドにactiveクラスを付与
+// slides[0].classList.add('active');
+
 
 
 // ポップアップ要素を取得
@@ -104,6 +105,8 @@ document.querySelectorAll('.popup-image').forEach(img => {
     });
 });
 
+
+
 // 閉じるボタンクリック時のイベント
 closeBtn.addEventListener('click', () => {
     popup.style.display = 'none'; // ポップアップを非表示
@@ -115,3 +118,4 @@ window.addEventListener('click', (event) => {
         popup.style.display = 'none'; // ポップアップを非表示
     }
 });
+
