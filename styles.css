@@ -553,3 +553,8 @@ transform: scale(1.1); /* ホバー時に画像を拡大 */
 .content-container a:hover {
   color: #0056b3;
 }
+
+.ChannelURL{
+  padding-top: 20px;
+  color: #959f13;
+}
