@@ -459,13 +459,14 @@ footer {
 
 .gallery img:hover {
 opacity: 0.8;
-transform: scale(1.1); /* ホバー時に画像を拡大 */
+transform: scale(1.05);  /*ホバー時に画像を拡大 */
 
 }
 
 .gallery-item {
   text-align: center;
 }
+
 /* ポップアップの背景（非表示時は透明） */
 .popup {
   display: none; 
