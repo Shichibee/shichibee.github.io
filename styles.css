@@ -484,10 +484,14 @@ footer {
   display: flex;
   justify-content: space-around;
   margin-top: 50px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px; /* 要素間の余白 */
 }
 
 .gallery img {
   width: 150px;
+  height: auto;
   cursor: pointer;
   border-radius: 100px;
   transition: transform 0.2s;
@@ -500,8 +504,34 @@ transform: scale(1.05);  /*ホバー時に画像を拡大 */
 
 }
 
+
 .gallery-item {
-  text-align: center;
+	text-align: center;
+    flex: 1 1 calc(33.333% - 20px); /* デフォルトでは3列配置 */
+    max-width: calc(33.333% - 20px);
+    box-sizing: border-box;
+}
+
+
+
+/* 画面幅が800px以下（タブレットサイズ）なら2列にする */
+@media (max-width: 600px) {
+    .gallery-item {
+        flex: 1 1 calc(50% - 20px);
+        max-width: calc(50% - 20px);
+    }
+}
+
+/* 画面幅が500px以下（スマホサイズ）なら1列にする */
+@media (max-width: 400px) {
+    .gallery {
+        flex-direction: column;
+        align-items: center;
+    }
+    .gallery-item {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
 }
 
 /* ポップアップの背景（非表示時は透明） */
