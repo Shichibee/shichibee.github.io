@@ -515,7 +515,7 @@ transform: scale(1.05);  /*ホバー時に画像を拡大 */
 
 
 /* 画面幅が800px以下（タブレットサイズ）なら2列にする */
-@media (max-width: 600px) {
+@media (max-width: 800px) {
     .gallery-item {
         flex: 1 1 calc(50% - 20px);
         max-width: calc(50% - 20px);
@@ -523,7 +523,7 @@ transform: scale(1.05);  /*ホバー時に画像を拡大 */
 }
 
 /* 画面幅が500px以下（スマホサイズ）なら1列にする */
-@media (max-width: 400px) {
+@media (max-width: 500px) {
     .gallery {
         flex-direction: column;
         align-items: center;
