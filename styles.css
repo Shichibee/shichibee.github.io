@@ -337,6 +337,26 @@ footer {
 	  text-align: center;
 	  gap: 15px; /* 画像とボタンの間隔 */
   }
+
+.ssh img {
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	align-items: center;
+	max-width: 600px; /* 最大幅を制限 */
+	max-height: 497px;
+	object-fit: contain; /* 比率を維持して収める */
+	}
+  
+  .ssh {
+	  display: flex;
+	  flex-direction: column;
+	  align-items: center; /* 画像とボタンを中央揃え */
+	  text-align: center;
+	  gap: 15px; /* 画像とボタンの間隔 */
+  }
+
   
   .play-button {
 	  display: inline-block;
