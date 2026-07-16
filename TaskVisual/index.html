@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>進捗ビジュアル Todoリスト</title>
+  <style>
+    /* 全体のスタイル設定 */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+      color: #202124;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* --- 上部：トップナビゲーションバー --- */
+    .top-header {
+      height: 60px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between; /* 左右に配置を分ける */
+      padding: 0 16px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .header-left, .header-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #5f6368;
+      cursor: pointer;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      transition: background-color 0.2s;
+    }
+
+    .hamburger-btn:hover {
+      background-color: #f1f3f4;
+    }
+
+    .app-logo {
+      font-size: 20px;
+      font-weight: bold;
+      color: #5f6368;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ★追加：セーブ＆ロードボタンのスタイル */
+    .action-btn {
+      background-color: #f1f3f4;
+      border: 1px solid #dadce0;
+      color: #3c4043;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background-color 0.2s, box-shadow 0.2s;
+    }
+
+    .action-btn:hover {
+      background-color: #e8eaed;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    /* --- メイン領域 --- */
+    .main-container {
+      display: flex;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+
+    /* --- 左側：サイドバー --- */
+    .sidebar {
+      width: 260px;
+      background-color: #ffffff;
+      border-right: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 8px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      transition: width 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .sidebar.collapsed {
+      width: 0px;
+      padding-left: 0;
+      padding-right: 0;
+      border-right: none;
+      opacity: 0;
+    }
+
+    .sidebar-header {
+      font-size: 16px;
+      font-weight: bold;
+      padding: 8px 16px 16px;
+      color: #5f6368;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .add-list-btn {
+      background: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .add-list-btn:hover {
+      background: #3367d6;
+    }
+
+    .list-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .list-menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: 0 24px 24px 0;
+      cursor: pointer;
+      margin-bottom: 4px;
+      color: #202124;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .list-menu-item:hover {
+      background-color: #f1f3f4;
+    }
+
+    .list-menu-item.active {
+      background-color: #feefc3;
+      color: #202124;
+      font-weight: bold;
+    }
+
+    .list-menu-item .delete-list-btn {
+      background: none;
+      border: none;
+      color: #80868b;
+      cursor: pointer;
+      font-size: 14px;
+      display: none;
+      padding: 2px 6px;
+    }
+
+    .list-menu-item:hover .delete-list-btn {
+      display: inline-block;
+    }
+
+    /* --- 右側：メインコンテンツ --- */
+    .main-content {
+      flex-grow: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      transition: margin 0.3s ease;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 600px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+      box-sizing: border-box;
+      align-self: flex-start;
+    }
+
+    .list-title-header {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: #202124;
+      border: none;
+      outline: none;
+      width: 100%;
+      background: transparent;
+    }
+
+    /* --- 上部：進捗ダッシュボード --- */
+    .dashboard {
+      background: #f1f3f4;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 15px;
+    }
+
+    .stats-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stat-row {
+      font-size: 14px;
+      color: #5f6368;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #202124;
+    }
+
+    .progress-circle-container {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .progress-circle {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .progress-bg {
+      fill: none;
+      stroke: #e8eaed;
+      stroke-width: 8;
+    }
+
+    .progress-bar-svg {
+      fill: none;
+      stroke: #4285f4;
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+
+    .progress-text {
+      position: absolute;
+      font-size: 18px;
+      font-weight: bold;
+      color: #4285f4;
+    }
+
+    .linear-progress-bg {
+      width: 100%;
+      height: 8px;
+      background: #e8eaed;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .linear-progress-bar {
+      height: 100%;
+      background: #4285f4;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    /* --- リストアイテム共通スタイル --- */
+    .task-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 4px;
+      border-bottom: 1px solid transparent;
+      transition: background 0.2s, margin-left 0.2s ease;
+    }
+
+    .task-item:hover {
+      background-color: #f1f3f4;
+      border-radius: 4px;
+    }
+
+    .task-item.indented {
+      margin-left: 28px;
+    }
+
+    .task-item.dragging {
+      opacity: 0.4;
+      background-color: #e8eaed;
+    }
+
+    /* 完了済みセクションに表示される「薄い親タスク」のスタイル */
+    .task-item.dummy-parent {
+      pointer-events: none;
+    }
+    .task-item.dummy-parent .drag-handle {
+      visibility: hidden;
+    }
+    .task-item.dummy-parent .task-checkbox {
+      opacity: 0.3;
+    }
+    .task-item.dummy-parent .task-text {
+      text-decoration: none !important;
+      color: #9aa0a6 !important;
+    }
+    .task-item.dummy-parent .delete-btn {
+      display: none !important;
+    }
+
+    .drag-handle {
+      color: #b0b3b8;
+      margin-right: 8px;
+      cursor: grab;
+      user-select: none;
+      font-size: 16px;
+      letter-spacing: -2px;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      margin-right: 12px;
+      cursor: pointer;
+      accent-color: #5f6368;
+      flex-shrink: 0;
+    }
+
+    .task-text {
+      flex-grow: 1;
+      font-size: 15px;
+      line-height: 1.4;
+      outline: none;
+      border: none;
+      background: transparent;
+      color: #202124;
+    }
+
+    .completed .task-text {
+      text-decoration: line-through;
+      color: #5f6368;
+    }
+
+    .separator-line {
+      flex-grow: 1;
+      border: none;
+      border-top: 1px solid #e0e0e0;
+      margin: 0 8px;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #5f6368;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0 8px;
+      display: none;
+    }
+
+    .task-item:hover .delete-btn {
+      display: inline-block;
+    }
+
+    /* --- タスク追加エリア --- */
+    .add-task-container {
+      margin-top: 5px;
+      border-top: 1px solid #f1f3f4;
+      border-bottom: 1px solid #f1f3f4;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .add-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 4px;
+      color: #5f6368;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .add-row:hover {
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    .add-icon {
+      font-size: 18px;
+      margin-right: 14px;
+      margin-left: 14px;
+      font-weight: bold;
+    }
+
+    .add-input {
+      border: none;
+      outline: none;
+      font-size: 15px;
+      width: 100%;
+      background: transparent;
+      color: #202124;
+      cursor: text;
+    }
+
+    .add-input::placeholder {
+      color: #5f6368;
+    }
+
+    .add-separator-text {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* --- 完了済みセクション --- */
+    .completed-section {
+      margin-top: 15px;
+    }
+
+    .completed-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      color: #5f6368;
+      font-size: 14px;
+      padding: 8px 4px;
+      user-select: none;
+    }
+
+    .completed-toggle:hover {
+      background-color: #f1f3f4;
+      border-radius: 4px;
+    }
+
+    .toggle-arrow {
+      margin-right: 10px;
+      transition: transform 0.2s;
+    }
+
+    .toggle-arrow.closed {
+      transform: rotate(-90deg);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="top-header">
+    <div class="header-left">
+      <button class="hamburger-btn" onclick="toggleSidebar()" title="メインメニュー">≡</button>
+      <div class="app-logo">
+        <span>💡</span>
+        <span>講義タスク Keep</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="action-btn" onclick="saveToFile()" title="データをファイルに保存">💾 セーブ</button>
+      <button class="action-btn" onclick="document.getElementById('file-input').click()" title="保存したファイルを読み込む">📂 ロード</button>
+      <input type="file" id="file-input" style="display: none;" accept=".json" onchange="loadFromFile(event)">
+    </div>
+  </header>
+
+  <div class="main-container">
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span>講義・リスト</span>
+        <button class="add-list-btn" onclick="createNewList()">＋ 追加</button>
+      </div>
+      <ul class="list-menu" id="sidebar-list-menu"></ul>
+    </nav>
+
+    <main class="main-content">
+      <div class="app-container">
+        <input type="text" id="current-list-title" class="list-title-header" placeholder="タイトルの無いリスト" onchange="updateListTitle(this.value)">
+
+        <div class="dashboard">
+          <div class="stats-info">
+            <div class="stat-row">
+              完了済 / タスク数 : <span class="stat-value" id="task-counts">0 / 0</span>
+            </div>
+            <div class="stat-row">
+              現在の進捗: <span class="stat-value" id="progress-percent-text">0%</span>
+            </div>
+            <div class="linear-progress-bg">
+              <div class="linear-progress-bar" id="linear-progress"></div>
+            </div>
+          </div>
+
+          <div class="progress-circle-container">
+            <svg class="progress-circle" viewBox="0 0 100 100">
+              <circle class="progress-bg" cx="50" cy="50" r="40"></circle>
+              <circle class="progress-bar-svg" id="circle-progress" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+            </svg>
+            <div class="progress-text" id="circle-text">0%</div>
+          </div>
+        </div>
+
+        <ul class="task-list" id="active-list"></ul>
+
+        <div class="add-task-container">
+          <div class="add-row" onclick="document.getElementById('new-task-input').focus();">
+            <span class="add-icon">＋</span>
+            <input type="text" id="new-task-input" class="add-input" placeholder="リストアイテム" onkeydown="handleNewTaskKeyPress(event)">
+          </div>
+          <div class="add-row" onclick="addSeparatorItem()">
+            <span class="add-icon">＋</span>
+            <span class="add-separator-text">区切り線</span>
+          </div>
+        </div>
+
+        <div class="completed-section" id="completed-section" style="display: none;">
+          <div class="completed-toggle" onclick="toggleCompletedList()">
+            <span class="toggle-arrow" id="toggle-arrow">﹀</span>
+            <span id="completed-count-text">0個の完了済みアイテム</span>
+          </div>
+          <ul class="task-list" id="completed-list"></ul>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let appData = {
+      currentListId: 1,
+      lists: []
+    };
+    let isCompletedListOpen = true;
+    let draggedItemId = null;
+    let dragStartX = 0;
+
+    window.onload = function() {
+      const savedData = localStorage.getItem('google_keep_multi_lists_v2');
+      if (savedData) {
+        appData = JSON.parse(savedData);
+      } else {
+        appData = {
+          currentListId: 1,
+          lists: [
+            {
+              id: 1,
+              title: '〇〇の講義のタスク',
+              tasks: [
+                { id: 101, text: '第1回 課題レポート提出', completed: true, indented: false },
+                { id: 102, text: '第2回 講義スライドを読む', completed: false, indented: false },
+                { id: 104, isSeparator: true, completed: false, indented: false },
+                { id: 103, text: '中間テストの勉強（過去問解く）', completed: false, indented: true }
+              ]
+            },
+            {
+              id: 2,
+              title: '△△の講義のタスク',
+              tasks: [
+                { id: 201, text: '教科書 P.20〜35を読む', completed: false, indented: false },
+                { id: 202, text: '小テスト準備', completed: false, indented: false }
+              ]
+            }
+          ]
+        };
+      }
+      renderSidebar();
+      renderMain();
+    };
+
+    /* --- ★新規追加：セーブ＆ロード機能 --- */
+    function saveToFile() {
+      // データを整ったJSON文字列に変換
+      const dataStr = JSON.stringify(appData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      // 日付を入れたわかりやすいファイル名にする
+      const today = new Date().toISOString().slice(0, 10);
+      const fileName = `todo_save_${today}.json`;
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function loadFromFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const loadedData = JSON.parse(e.target.result);
+          // ファイルの形式が正しいかチェック
+          if (loadedData && Array.isArray(loadedData.lists)) {
+            if (confirm("今のリストを上書きして、ファイルからロードしますか？")) {
+              appData = loadedData;
+              if (!appData.lists.some(l => l.id === appData.currentListId)) {
+                appData.currentListId = appData.lists[0]?.id || 1;
+              }
+              saveAppData();
+              alert("ロードが完了しました！");
+            }
+          } else {
+            alert("エラー：正しいセーブファイルの形式ではありません。");
+          }
+        } catch (error) {
+          alert("エラー：ファイルの読み込みに失敗しました。");
+          console.error(error);
+        }
+        event.target.value = ''; // 同じファイルを再ロードできるようにリセット
+      };
+      reader.readAsText(file);
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    }
+
+    function saveAppData() {
+      localStorage.setItem('google_keep_multi_lists_v2', JSON.stringify(appData));
+      renderSidebar();
+      renderMain();
+    }
+
+    function getCurrentList() {
+      return appData.lists.find(l => l.id === appData.currentListId) || appData.lists[0];
+    }
+
+    /* --- サイドバー管理 --- */
+    function renderSidebar() {
+      const sidebarMenu = document.getElementById('sidebar-list-menu');
+      sidebarMenu.innerHTML = '';
+      appData.lists.forEach(list => {
+        const li = document.createElement('li');
+        li.className = `list-menu-item ${list.id === appData.currentListId ? 'active' : ''}`;
+        li.onclick = () => switchList(list.id);
+        li.innerHTML = `
+          <span>${list.title || '（名称未設定）'}</span>
+          <button class="delete-list-btn" onclick="deleteList(event, ${list.id})" title="削除">🗑️</button>
+        `;
+        sidebarMenu.appendChild(li);
+      });
+    }
+
+    function switchList(id) {
+      appData.currentListId = id;
+      saveAppData();
+    }
+
+    function createNewList() {
+      const newId = Date.now();
+      appData.lists.push({
+        id: newId,
+        title: `新しい講義リスト ${appData.lists.length + 1}`,
+        tasks: []
+      });
+      appData.currentListId = newId;
+      saveAppData();
+      setTimeout(() => document.getElementById('current-list-title').select(), 100);
+    }
+
+    function deleteList(event, id) {
+      event.stopPropagation();
+      if (appData.lists.length <= 1) {
+        alert("最後のリストは削除できません！");
+        return;
+      }
+      if (confirm("このリストを削除してもよろしいですか？")) {
+        appData.lists = appData.lists.filter(l => l.id !== id);
+        if (appData.currentListId === id) appData.currentListId = appData.lists[0].id;
+        saveAppData();
+      }
+    }
+
+    function updateListTitle(newTitle) {
+      const list = getCurrentList();
+      if (list) {
+        list.title = newTitle;
+        localStorage.setItem('google_keep_multi_lists_v2', JSON.stringify(appData));
+        renderSidebar();
+      }
+    }
+
+    /* --- 区切り線機能 --- */
+    function addSeparatorItem() {
+      const list = getCurrentList();
+      list.tasks.push({
+        id: Date.now(),
+        isSeparator: true,
+        completed: false,
+        indented: false
+      });
+      saveAppData();
+    }
+
+    /* --- タスク入力＆カーソル移動 --- */
+    function handleNewTaskKeyPress(event) {
+      if (event.key === 'Enter') {
+        const input = document.getElementById('new-task-input');
+        const text = input.value.trim();
+        if (text !== '') {
+          const list = getCurrentList();
+          list.tasks.push({
+            id: Date.now(),
+            text: text,
+            completed: false,
+            indented: false
+          });
+          input.value = '';
+          saveAppData();
+        }
+      }
+    }
+
+    function handleTaskKeyDown(event, currentTaskId) {
+      const list = getCurrentList();
+      const currentIndex = list.tasks.findIndex(t => t.id === currentTaskId);
+      if (currentIndex === -1) return;
+
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+        const activeInputs = Array.from(document.querySelectorAll('.task-text'));
+        const activeIndex = activeInputs.indexOf(event.target);
+        if (event.key === 'ArrowUp' && activeIndex > 0) {
+          event.preventDefault();
+          activeInputs[activeIndex - 1].focus();
+        } else if (event.key === 'ArrowDown' && activeIndex < activeInputs.length - 1) {
+          event.preventDefault();
+          activeInputs[activeIndex + 1].focus();
+        }
+        return;
+      }
+
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const newTaskId = Date.now();
+        const currentIndented = list.tasks[currentIndex].indented || false;
+        list.tasks.splice(currentIndex + 1, 0, {
+          id: newTaskId,
+          text: '',
+          completed: false,
+          indented: currentIndented
+        });
+        saveAppData();
+        setTimeout(() => {
+          const nextInput = document.querySelector(`input[data-task-id="${newTaskId}"]`);
+          if (nextInput) nextInput.focus();
+        }, 50);
+      } else if (event.key === 'Backspace' && event.target.value === '') {
+        event.preventDefault();
+        if (currentIndex > 0) {
+          const prevTaskId = list.tasks[currentIndex - 1].id;
+          deleteTask(currentTaskId);
+          setTimeout(() => {
+            const prevInput = document.querySelector(`input[data-task-id="${prevTaskId}"]`);
+            if (prevInput) {
+              prevInput.focus();
+              prevInput.selectionStart = prevInput.selectionEnd = prevInput.value.length;
+            }
+          }, 50);
+        } else {
+          deleteTask(currentTaskId);
+        }
+      }
+    }
+
+    /* --- 親子連動チェック切り替え --- */
+    function toggleTask(id) {
+      const list = getCurrentList();
+      const index = list.tasks.findIndex(t => t.id === id);
+      
+      if (index !== -1) {
+        const task = list.tasks[index];
+        task.completed = !task.completed;
+
+        // 親を切り替えた場合、下の子タスクも一気にする
+        if (!task.indented) {
+          for (let i = index + 1; i < list.tasks.length; i++) {
+            if (list.tasks[i].indented) {
+              list.tasks[i].completed = task.completed;
+            } else {
+              break;
+            }
+          }
+        } 
+        // 子を切り替えた場合、親の状態を調整する
+        else {
+          let parentIndex = -1;
+          for (let i = index - 1; i >= 0; i--) {
+            if (!list.tasks[i].indented && !list.tasks[i].isSeparator) {
+              parentIndex = i;
+              break;
+            }
+          }
+
+          if (parentIndex !== -1) {
+            if (!task.completed) {
+              list.tasks[parentIndex].completed = false;
+            } else {
+              let allChildrenCompleted = true;
+              for (let i = parentIndex + 1; i < list.tasks.length; i++) {
+                if (list.tasks[i].indented) {
+                  if (!list.tasks[i].completed) {
+                    allChildrenCompleted = false;
+                    break;
+                  }
+                } else {
+                  break;
+                }
+              }
+              if (allChildrenCompleted) {
+                list.tasks[parentIndex].completed = true;
+              }
+            }
+          }
+        }
+
+        saveAppData();
+      }
+    }
+
+    function deleteTask(id) {
+      const list = getCurrentList();
+      list.tasks = list.tasks.filter(t => t.id !== id);
+      saveAppData();
+    }
+
+    function updateTaskText(id, newText) {
+      const list = getCurrentList();
+      const task = list.tasks.find(t => t.id === id);
+      if (task) {
+        task.text = newText;
+        localStorage.setItem('google_keep_multi_lists_v2', JSON.stringify(appData));
+      }
+    }
+
+    function toggleCompletedList() {
+      isCompletedListOpen = !isCompletedListOpen;
+      const list = document.getElementById('completed-list');
+      const arrow = document.getElementById('toggle-arrow');
+      if (isCompletedListOpen) {
+        list.style.display = 'block';
+        arrow.classList.remove('closed');
+      } else {
+        list.style.display = 'none';
+        arrow.classList.add('closed');
+      }
+    }
+
+    /* --- ドラッグ＆ドロップ --- */
+    function handleDragStart(event, id) {
+      draggedItemId = id;
+      dragStartX = event.clientX;
+      event.target.classList.add('dragging');
+      event.dataTransfer.setData('text/plain', '');
+    }
+
+    function handleDragOver(event, targetId) {
+      event.preventDefault();
+      if (draggedItemId === null || draggedItemId === targetId) return;
+
+      const list = getCurrentList();
+      const fromIndex = list.tasks.findIndex(t => t.id === draggedItemId);
+      const toIndex = list.tasks.findIndex(t => t.id === targetId);
+      if (fromIndex === -1 || toIndex === -1) return;
+
+      const [movedItem] = list.tasks.splice(fromIndex, 1);
+      list.tasks.splice(toIndex, 0, movedItem);
+
+      const diffX = event.clientX - dragStartX;
+      if (toIndex > 0) {
+        if (diffX > 25) {
+          movedItem.indented = true;
+        } else if (diffX < -10) {
+          movedItem.indented = false;
+        }
+      } else {
+        movedItem.indented = false;
+      }
+
+      renderMain(false);
+    }
+
+    function handleDragEnd(event) {
+      event.target.classList.remove('dragging');
+      draggedItemId = null;
+      saveAppData();
+    }
+
+    /* --- 画面描画 --- */
+    function renderMain(save = true) {
+      if (save) localStorage.setItem('google_keep_multi_lists_v2', JSON.stringify(appData));
+      const list = getCurrentList();
+      if (!list) return;
+
+      document.getElementById('current-list-title').value = list.title;
+
+      const activeList = document.getElementById('active-list');
+      const completedList = document.getElementById('completed-list');
+      const completedSection = document.getElementById('completed-section');
+      
+      activeList.innerHTML = '';
+      completedList.innerHTML = '';
+
+      let completedCount = 0;
+      let totalTasksCount = 0;
+      let currentParent = null;
+      const addedDummyParents = new Set();
+
+      list.tasks.forEach((task) => {
+        if (!task.indented && !task.isSeparator) {
+          currentParent = task;
+        }
+
+        const li = document.createElement('li');
+        li.className = `task-item ${task.completed ? 'completed' : ''} ${task.indented ? 'indented' : ''}`;
+        li.setAttribute('draggable', 'true');
+        li.ondragstart = (e) => handleDragStart(e, task.id);
+        li.ondragover = (e) => handleDragOver(e, task.id);
+        li.ondragend = (e) => handleDragEnd(e);
+        
+        if (task.isSeparator) {
+          li.innerHTML = `
+            <span class="drag-handle" title="ドラッグで移動/右に引いてインデント">⋮⋮</span>
+            <hr class="separator-line">
+            <button class="delete-btn" onclick="deleteTask(${task.id})" title="削除">×</button>
+          `;
+          activeList.appendChild(li);
+        } else {
+          totalTasksCount++;
+          li.innerHTML = `
+            <span class="drag-handle" title="ドラッグで移動/右に引いてインデント">⋮⋮</span>
+            <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})">
+            <input type="text" class="task-text" data-task-id="${task.id}" value="${task.text}" 
+                   oninput="updateTaskText(${task.id}, this.value)" 
+                   onkeydown="handleTaskKeyDown(event, ${task.id})">
+            <button class="delete-btn" onclick="deleteTask(${task.id})" title="削除">×</button>
+          `;
+
+          if (task.completed) {
+            if (task.indented && currentParent && !currentParent.completed) {
+              if (!addedDummyParents.has(currentParent.id)) {
+                const dummyLi = document.createElement('li');
+                dummyLi.className = 'task-item dummy-parent';
+                dummyLi.innerHTML = `
+                  <span class="drag-handle">⋮⋮</span>
+                  <input type="checkbox" class="task-checkbox" disabled>
+                  <span class="task-text">${currentParent.text}</span>
+                `;
+                completedList.appendChild(dummyLi);
+                addedDummyParents.add(currentParent.id);
+              }
+            }
+
+            completedList.appendChild(li);
+            completedCount++;
+          } else {
+            activeList.appendChild(li);
+          }
+        }
+      });
+
+      if (completedCount > 0) {
+        completedSection.style.display = 'block';
+        document.getElementById('completed-count-text').innerText = `${completedCount}個の完了済みアイテム`;
+      } else {
+        completedSection.style.display = 'none';
+      }
+
+      updateDashboard(totalTasksCount, completedCount);
+    }
+
+    function updateDashboard(total, completed) {
+      const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+      
+      document.getElementById('task-counts').innerText = `${completed} / ${total}`;
+      document.getElementById('progress-percent-text').innerText = `${percentage}%`;
+      document.getElementById('circle-text').innerText = `${percentage}%`;
+
+      document.getElementById('linear-progress').style.width = `${percentage}%`;
+
+      const circumference = 251.2;
+      const offset = circumference - (percentage / 100) * circumference;
+      document.getElementById('circle-progress').style.strokeDashoffset = offset;
+    }
+  </script>
+</body>
+</html>
