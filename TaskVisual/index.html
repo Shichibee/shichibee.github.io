@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>進捗ビジュアル Todoリスト</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>✅</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="Taskfavicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <style>
+    /* 全体のスタイル設定 */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f8f9fa;
@@ -26,7 +27,7 @@
       border-bottom: 1px solid #e0e0e0;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: space-between; /* 左右に配置を分ける */
       padding: 0 16px;
       box-sizing: border-box;
       flex-shrink: 0;
@@ -67,6 +68,7 @@
       gap: 8px;
     }
 
+    /* セーブ＆ロードボタンのスタイル */
     .action-btn {
       background-color: #f1f3f4;
       border: 1px solid #dadce0;
@@ -95,6 +97,7 @@
       overflow: hidden;
     }
 
+    /* --- 左側：サイドバー --- */
     .sidebar {
       width: 260px;
       background-color: #ffffff;
@@ -386,6 +389,7 @@
       background-color: #e8eaed;
     }
 
+    /* 完了済みセクションに表示される「薄い親タスク」のスタイル */
     .task-item.dummy-parent {
       pointer-events: none;
     }
@@ -544,8 +548,8 @@
     <div class="header-left">
       <button class="hamburger-btn" onclick="toggleSidebar()" title="メインメニュー">≡</button>
       <div class="app-logo">
-        <span>💡</span>
-        <span>講義タスク Keep</span>
+      <span>✅</span>
+      <span>進捗ビジュアル Todo</span>
       </div>
     </div>
     <div class="header-right">
@@ -624,8 +628,8 @@
     let draggedItemId = null;
     let dragStartX = 0;
 
-    // ★追加：100%の瞬間を検知するためのメモリ変数
-    let previousPercentage = 0;
+    // ★追加：100%の瞬間を検知するためのメモリ変数（初期値はnullで移動バグを防止）
+    let previousPercentage = null;
     let isConfettiCoolingDown = false;
 
     window.onload = function() {
@@ -663,7 +667,6 @@
 
     /* --- ★新規追加：紙吹雪を舞わせる処理 --- */
     function triggerConfetti() {
-      // 画面中央から華やかに発射！
       confetti({
         particleCount: 100,
         spread: 70,
@@ -690,12 +693,15 @@
       }, 3000);
     }
 
+    /* --- セーブ＆ロード機能 --- */
     function saveToFile() {
       const dataStr = JSON.stringify(appData, null, 2);
       const blob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
+      
       const today = new Date().toISOString().slice(0, 10);
       const fileName = `todo_save_${today}.json`;
+
       const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
@@ -708,6 +714,7 @@
     function loadFromFile(event) {
       const file = event.target.files[0];
       if (!file) return;
+
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
@@ -718,6 +725,7 @@
               if (!appData.lists.some(l => l.id === appData.currentListId)) {
                 appData.currentListId = appData.lists[0]?.id || 1;
               }
+              previousPercentage = null; // ロード直後の自動お祝いを防止
               saveAppData();
               alert("ロードが完了しました！");
             }
@@ -747,6 +755,7 @@
       return appData.lists.find(l => l.id === appData.currentListId) || appData.lists[0];
     }
 
+    /* --- サイドバー管理 --- */
     function renderSidebar() {
       const sidebarMenu = document.getElementById('sidebar-list-menu');
       sidebarMenu.innerHTML = '';
@@ -764,7 +773,7 @@
 
     function switchList(id) {
       appData.currentListId = id;
-      previousPercentage = 0; // 切り替えたときは自動お祝いをリセット
+      previousPercentage = null; // ★移動時は null にして自動お祝いを防止！
       saveAppData();
     }
 
@@ -776,7 +785,7 @@
         tasks: []
       });
       appData.currentListId = newId;
-      previousPercentage = 0;
+      previousPercentage = null;
       saveAppData();
       setTimeout(() => document.getElementById('current-list-title').select(), 100);
     }
@@ -791,7 +800,7 @@
         appData.lists = appData.lists.filter(l => l.id !== id);
         if (appData.currentListId === id) {
           appData.currentListId = appData.lists[0].id;
-          previousPercentage = 0;
+          previousPercentage = null;
         }
         saveAppData();
       }
@@ -806,6 +815,7 @@
       }
     }
 
+    /* --- 区切り線機能 --- */
     function addSeparatorItem() {
       const list = getCurrentList();
       list.tasks.push({
@@ -817,6 +827,7 @@
       saveAppData();
     }
 
+    /* --- タスク入力＆カーソル移動 --- */
     function handleNewTaskKeyPress(event) {
       if (event.key === 'Enter') {
         const input = document.getElementById('new-task-input');
@@ -886,6 +897,7 @@
       }
     }
 
+    /* --- 親子連動チェック切り替え --- */
     function toggleTask(id) {
       const list = getCurrentList();
       const index = list.tasks.findIndex(t => t.id === id);
@@ -965,6 +977,7 @@
       }
     }
 
+    /* --- ドラッグ＆ドロップ --- */
     function handleDragStart(event, id) {
       draggedItemId = id;
       dragStartX = event.clientX;
@@ -1004,6 +1017,7 @@
       saveAppData();
     }
 
+    /* --- 画面描画 --- */
     function renderMain(save = true) {
       if (save) localStorage.setItem('google_keep_multi_lists_v2', JSON.stringify(appData));
       const list = getCurrentList();
@@ -1117,8 +1131,8 @@
         // お祝いボタンを表示
         confettiBtnEl.style.display = 'inline-block';
 
-        // 前回が100%じゃなかった場合（初めて100%に到達した瞬間）だけ自動で紙吹雪！
-        if (previousPercentage < 100) {
+        // ★修正：前回が null(移動直後) ではなく、実際に操作して100%に到達した瞬間だけ自動で紙吹雪！
+        if (previousPercentage !== null && previousPercentage < 100) {
           triggerConfetti();
         }
       } else {
