@@ -4,10 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>進捗ビジュアル Todoリスト</title>
-  <!-- <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>✅</text></svg>"> -->
-  <link rel="icon" type="image/svg+xml" href="Taskfavicon.svg">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>✅</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <style>
-    /* 全体のスタイル設定 */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f8f9fa;
@@ -27,7 +26,7 @@
       border-bottom: 1px solid #e0e0e0;
       display: flex;
       align-items: center;
-      justify-content: space-between; /* 左右に配置を分ける */
+      justify-content: space-between;
       padding: 0 16px;
       box-sizing: border-box;
       flex-shrink: 0;
@@ -68,7 +67,6 @@
       gap: 8px;
     }
 
-    /* ★追加：セーブ＆ロードボタンのスタイル */
     .action-btn {
       background-color: #f1f3f4;
       border: 1px solid #dadce0;
@@ -97,7 +95,6 @@
       overflow: hidden;
     }
 
-    /* --- 左側：サイドバー --- */
     .sidebar {
       width: 260px;
       background-color: #ffffff;
@@ -234,6 +231,7 @@
       align-items: center;
       justify-content: space-around;
       gap: 15px;
+      position: relative;
     }
 
     .stats-info {
@@ -251,6 +249,11 @@
       font-size: 20px;
       font-weight: bold;
       color: #202124;
+    }
+
+    /* ★お祝いオレンジの文字色クラス */
+    .stat-value.celebrate-text {
+      color: #ff6d00 !important;
     }
 
     .progress-circle-container {
@@ -279,7 +282,12 @@
       stroke: #4285f4;
       stroke-width: 8;
       stroke-linecap: round;
-      transition: stroke-dashoffset 0.5s ease;
+      transition: stroke-dashoffset 0.5s ease, stroke 0.3s ease;
+    }
+
+    /* ★100%のとき円グラフをオレンジに！ */
+    .progress-bar-svg.celebrate {
+      stroke: #ff6d00;
     }
 
     .progress-text {
@@ -287,6 +295,12 @@
       font-size: 18px;
       font-weight: bold;
       color: #4285f4;
+      transition: color 0.3s ease;
+    }
+
+    /* ★100%のとき円の中の％をオレンジに！ */
+    .progress-text.celebrate {
+      color: #ff6d00;
     }
 
     .linear-progress-bg {
@@ -302,7 +316,45 @@
       height: 100%;
       background: #4285f4;
       width: 0%;
-      transition: width 0.5s ease;
+      transition: width 0.5s ease, background 0.3s ease;
+    }
+
+    /* ★100%のとき横長バーをオレンジに！ */
+    .linear-progress-bar.celebrate {
+      background: #ff6d00;
+    }
+
+    /* ★追加：100%のときだけ現れる「お祝いボタン」のスタイル */
+    .confetti-btn {
+      background: linear-gradient(135deg, #ff9900, #ff6d00);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(255, 109, 0, 0.3);
+      transition: transform 0.1s, opacity 0.2s, background 0.2s;
+      display: none; /* 普段は隠す */
+      margin-top: 4px;
+      align-self: flex-start;
+    }
+
+    .confetti-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .confetti-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* 連打防止クールダウン中のスタイル */
+    .confetti-btn.disabled {
+      background: #b0b3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
     }
 
     /* --- リストアイテム共通スタイル --- */
@@ -334,7 +386,6 @@
       background-color: #e8eaed;
     }
 
-    /* 完了済みセクションに表示される「薄い親タスク」のスタイル */
     .task-item.dummy-parent {
       pointer-events: none;
     }
@@ -493,8 +544,8 @@
     <div class="header-left">
       <button class="hamburger-btn" onclick="toggleSidebar()" title="メインメニュー">≡</button>
       <div class="app-logo">
-      <span>✅</span>
-      <span>進捗ビジュアル Todo</span>
+        <span>💡</span>
+        <span>講義タスク Keep</span>
       </div>
     </div>
     <div class="header-right">
@@ -528,6 +579,7 @@
             <div class="linear-progress-bg">
               <div class="linear-progress-bar" id="linear-progress"></div>
             </div>
+            <button class="confetti-btn" id="confetti-btn" onclick="fireConfettiManually()">🎉 もう一度お祝い！</button>
           </div>
 
           <div class="progress-circle-container">
@@ -572,6 +624,10 @@
     let draggedItemId = null;
     let dragStartX = 0;
 
+    // ★追加：100%の瞬間を検知するためのメモリ変数
+    let previousPercentage = 0;
+    let isConfettiCoolingDown = false;
+
     window.onload = function() {
       const savedData = localStorage.getItem('google_keep_multi_lists_v2');
       if (savedData) {
@@ -605,17 +661,41 @@
       renderMain();
     };
 
-    /* --- ★新規追加：セーブ＆ロード機能 --- */
+    /* --- ★新規追加：紙吹雪を舞わせる処理 --- */
+    function triggerConfetti() {
+      // 画面中央から華やかに発射！
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+
+    // お祝いボタンを押したとき（クールダウン機能つき！）
+    function fireConfettiManually() {
+      if (isConfettiCoolingDown) return; // 連打中の場合は無視してバグを防ぐ！
+
+      triggerConfetti();
+
+      // 3秒間ボタンを無効化（クールダウン）
+      isConfettiCoolingDown = true;
+      const btn = document.getElementById('confetti-btn');
+      btn.classList.add('disabled');
+      btn.innerText = '⏳ 休憩中...';
+
+      setTimeout(() => {
+        isConfettiCoolingDown = false;
+        btn.classList.remove('disabled');
+        btn.innerText = '🎉 もう一度お祝い！';
+      }, 3000);
+    }
+
     function saveToFile() {
-      // データを整ったJSON文字列に変換
       const dataStr = JSON.stringify(appData, null, 2);
       const blob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      
-      // 日付を入れたわかりやすいファイル名にする
       const today = new Date().toISOString().slice(0, 10);
       const fileName = `todo_save_${today}.json`;
-
       const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
@@ -628,12 +708,10 @@
     function loadFromFile(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
           const loadedData = JSON.parse(e.target.result);
-          // ファイルの形式が正しいかチェック
           if (loadedData && Array.isArray(loadedData.lists)) {
             if (confirm("今のリストを上書きして、ファイルからロードしますか？")) {
               appData = loadedData;
@@ -650,7 +728,7 @@
           alert("エラー：ファイルの読み込みに失敗しました。");
           console.error(error);
         }
-        event.target.value = ''; // 同じファイルを再ロードできるようにリセット
+        event.target.value = '';
       };
       reader.readAsText(file);
     }
@@ -669,7 +747,6 @@
       return appData.lists.find(l => l.id === appData.currentListId) || appData.lists[0];
     }
 
-    /* --- サイドバー管理 --- */
     function renderSidebar() {
       const sidebarMenu = document.getElementById('sidebar-list-menu');
       sidebarMenu.innerHTML = '';
@@ -687,6 +764,7 @@
 
     function switchList(id) {
       appData.currentListId = id;
+      previousPercentage = 0; // 切り替えたときは自動お祝いをリセット
       saveAppData();
     }
 
@@ -698,6 +776,7 @@
         tasks: []
       });
       appData.currentListId = newId;
+      previousPercentage = 0;
       saveAppData();
       setTimeout(() => document.getElementById('current-list-title').select(), 100);
     }
@@ -710,7 +789,10 @@
       }
       if (confirm("このリストを削除してもよろしいですか？")) {
         appData.lists = appData.lists.filter(l => l.id !== id);
-        if (appData.currentListId === id) appData.currentListId = appData.lists[0].id;
+        if (appData.currentListId === id) {
+          appData.currentListId = appData.lists[0].id;
+          previousPercentage = 0;
+        }
         saveAppData();
       }
     }
@@ -724,7 +806,6 @@
       }
     }
 
-    /* --- 区切り線機能 --- */
     function addSeparatorItem() {
       const list = getCurrentList();
       list.tasks.push({
@@ -736,7 +817,6 @@
       saveAppData();
     }
 
-    /* --- タスク入力＆カーソル移動 --- */
     function handleNewTaskKeyPress(event) {
       if (event.key === 'Enter') {
         const input = document.getElementById('new-task-input');
@@ -806,7 +886,6 @@
       }
     }
 
-    /* --- 親子連動チェック切り替え --- */
     function toggleTask(id) {
       const list = getCurrentList();
       const index = list.tasks.findIndex(t => t.id === id);
@@ -815,7 +894,6 @@
         const task = list.tasks[index];
         task.completed = !task.completed;
 
-        // 親を切り替えた場合、下の子タスクも一気にする
         if (!task.indented) {
           for (let i = index + 1; i < list.tasks.length; i++) {
             if (list.tasks[i].indented) {
@@ -824,9 +902,7 @@
               break;
             }
           }
-        } 
-        // 子を切り替えた場合、親の状態を調整する
-        else {
+        } else {
           let parentIndex = -1;
           for (let i = index - 1; i >= 0; i--) {
             if (!list.tasks[i].indented && !list.tasks[i].isSeparator) {
@@ -889,7 +965,6 @@
       }
     }
 
-    /* --- ドラッグ＆ドロップ --- */
     function handleDragStart(event, id) {
       draggedItemId = id;
       dragStartX = event.clientX;
@@ -929,7 +1004,6 @@
       saveAppData();
     }
 
-    /* --- 画面描画 --- */
     function renderMain(save = true) {
       if (save) localStorage.setItem('google_keep_multi_lists_v2', JSON.stringify(appData));
       const list = getCurrentList();
@@ -1012,18 +1086,52 @@
       updateDashboard(totalTasksCount, completedCount);
     }
 
+    /* --- ★進捗グラフ＆100%お祝い演出の更新 --- */
     function updateDashboard(total, completed) {
       const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
       
-      document.getElementById('task-counts').innerText = `${completed} / ${total}`;
-      document.getElementById('progress-percent-text').innerText = `${percentage}%`;
-      document.getElementById('circle-text').innerText = `${percentage}%`;
+      const countsEl = document.getElementById('task-counts');
+      const percentTextEl = document.getElementById('progress-percent-text');
+      const circleTextEl = document.getElementById('circle-text');
+      const linearBarEl = document.getElementById('linear-progress');
+      const circleBarEl = document.getElementById('circle-progress');
+      const confettiBtnEl = document.getElementById('confetti-btn');
 
-      document.getElementById('linear-progress').style.width = `${percentage}%`;
+      countsEl.innerText = `${completed} / ${total}`;
+      percentTextEl.innerText = `${percentage}%`;
+      circleTextEl.innerText = `${percentage}%`;
+      linearBarEl.style.width = `${percentage}%`;
 
       const circumference = 251.2;
       const offset = circumference - (percentage / 100) * circumference;
-      document.getElementById('circle-progress').style.strokeDashoffset = offset;
+      circleBarEl.style.strokeDashoffset = offset;
+
+      // ★100%達成時の特別演出！
+      if (percentage === 100 && total > 0) {
+        // 色をオレンジ（お祝いカラー）にチェンジ！
+        linearBarEl.classList.add('celebrate');
+        circleBarEl.classList.add('celebrate');
+        circleTextEl.classList.add('celebrate');
+        percentTextEl.classList.add('celebrate-text');
+
+        // お祝いボタンを表示
+        confettiBtnEl.style.display = 'inline-block';
+
+        // 前回が100%じゃなかった場合（初めて100%に到達した瞬間）だけ自動で紙吹雪！
+        if (previousPercentage < 100) {
+          triggerConfetti();
+        }
+      } else {
+        // 100%未満になったら通常カラー（青）に戻してお祝いボタンを隠す
+        linearBarEl.classList.remove('celebrate');
+        circleBarEl.classList.remove('celebrate');
+        circleTextEl.classList.remove('celebrate');
+        percentTextEl.classList.remove('celebrate-text');
+        confettiBtnEl.style.display = 'none';
+      }
+
+      // 現在の進捗を記憶しておく
+      previousPercentage = percentage;
     }
   </script>
 </body>
