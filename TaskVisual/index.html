@@ -400,7 +400,7 @@
       display: none !important;
     }
 
-    /* ★修正：余白を元の index1.html と完全に同一に戻しました！ */
+    /* ★余白を元の index1.html と完全に同一に保持！ */
     .drag-handle {
       color: #b0b3b8;
       margin-right: 8px;
@@ -872,7 +872,7 @@
         return;
       }
 
-      // 十字キー移動
+      // 十字キー（上・下）移動
       if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
         const activeInputs = Array.from(document.querySelectorAll('.task-text'));
         const activeIndex = activeInputs.indexOf(event.target);
@@ -882,6 +882,33 @@
         } else if (event.key === 'ArrowDown' && activeIndex < activeInputs.length - 1) {
           event.preventDefault();
           activeInputs[activeIndex + 1].focus();
+        }
+        return;
+      }
+
+      // ★追加：行頭で左キー（←）を押したら上の行の末尾へジャンプ！
+      if (event.key === 'ArrowLeft' && event.target.selectionStart === 0 && event.target.selectionEnd === 0) {
+        const activeInputs = Array.from(document.querySelectorAll('.task-text'));
+        const activeIndex = activeInputs.indexOf(event.target);
+        if (activeIndex > 0) {
+          event.preventDefault();
+          const prevInput = activeInputs[activeIndex - 1];
+          prevInput.focus();
+          const len = prevInput.value.length;
+          prevInput.setSelectionRange(len, len); // 上の行の末尾へカーソルを合わせる
+        }
+        return;
+      }
+
+      // ★追加：行末で右キー（→）を押したら下の行の行頭へジャンプ！
+      if (event.key === 'ArrowRight' && event.target.selectionStart === event.target.value.length && event.target.selectionEnd === event.target.value.length) {
+        const activeInputs = Array.from(document.querySelectorAll('.task-text'));
+        const activeIndex = activeInputs.indexOf(event.target);
+        if (activeIndex < activeInputs.length - 1) {
+          event.preventDefault();
+          const nextInput = activeInputs[activeIndex + 1];
+          nextInput.focus();
+          nextInput.setSelectionRange(0, 0); // 下の行の先頭へカーソルを合わせる
         }
         return;
       }
