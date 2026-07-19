@@ -27,7 +27,7 @@
       border-bottom: 1px solid #e0e0e0;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: space-between; /* 左右に配置を分ける */
       padding: 0 16px;
       box-sizing: border-box;
       flex-shrink: 0;
@@ -254,6 +254,7 @@
       color: #202124;
     }
 
+    /* ★お祝いオレンジの文字色クラス */
     .stat-value.celebrate-text {
       color: #ff6d00 !important;
     }
@@ -287,6 +288,7 @@
       transition: stroke-dashoffset 0.5s ease, stroke 0.3s ease;
     }
 
+    /* ★100%のとき円グラフをオレンジに！ */
     .progress-bar-svg.celebrate {
       stroke: #ff6d00;
     }
@@ -299,6 +301,7 @@
       transition: color 0.3s ease;
     }
 
+    /* ★100%のとき円の中の％をオレンジに！ */
     .progress-text.celebrate {
       color: #ff6d00;
     }
@@ -319,10 +322,12 @@
       transition: width 0.5s ease, background 0.3s ease;
     }
 
+    /* ★100%のとき横長バーをオレンジに！ */
     .linear-progress-bar.celebrate {
       background: #ff6d00;
     }
 
+    /* ★追加：100%のときだけ現れる「お祝いボタン」のスタイル */
     .confetti-btn {
       background: linear-gradient(135deg, #ff9900, #ff6d00);
       color: white;
@@ -334,7 +339,7 @@
       cursor: pointer;
       box-shadow: 0 2px 5px rgba(255, 109, 0, 0.3);
       transition: transform 0.1s, opacity 0.2s, background 0.2s;
-      display: none;
+      display: none; /* 普段は隠す */
       margin-top: 4px;
       align-self: flex-start;
     }
@@ -347,6 +352,7 @@
       transform: scale(0.95);
     }
 
+    /* 連打防止クールダウン中のスタイル */
     .confetti-btn.disabled {
       background: #b0b3b8;
       cursor: not-allowed;
@@ -383,6 +389,7 @@
       background-color: #e8eaed;
     }
 
+    /* 完了済みセクションに表示される「薄い親タスク」のスタイル */
     .task-item.dummy-parent {
       pointer-events: none;
     }
@@ -400,28 +407,15 @@
       display: none !important;
     }
 
-    /* ★改良：チェックボタン横の「持ち手（⋮⋮）」を掴みやすくし、ここを押した時だけドラッグ可能に！ */
     .drag-handle {
       color: #b0b3b8;
-      margin-right: 4px;
+      margin-right: 8px;
       cursor: grab;
       user-select: none;
       font-size: 16px;
       letter-spacing: -2px;
-      padding: 6px 8px; /* マウスで掴みやすいように広めの判定領域 */
-      border-radius: 4px;
+      padding: 0 4px;
       flex-shrink: 0;
-      transition: background-color 0.2s, color 0.2s;
-    }
-
-    .drag-handle:hover {
-      color: #5f6368;
-      background-color: #e8eaed;
-    }
-
-    .drag-handle:active {
-      cursor: grabbing;
-      background-color: #dadce0;
     }
 
     .task-checkbox {
@@ -633,8 +627,8 @@
     let isCompletedListOpen = true;
     let draggedItemId = null;
     let dragStartX = 0;
-    let dragStartY = 0;
 
+    // ★追加：100%の瞬間を検知するためのメモリ変数（初期値はnullで移動バグを防止）
     let previousPercentage = null;
     let isConfettiCoolingDown = false;
 
@@ -671,7 +665,7 @@
       renderMain();
     };
 
-    /* --- 紙吹雪を舞わせる処理 --- */
+    /* --- ★新規追加：紙吹雪を舞わせる処理 --- */
     function triggerConfetti() {
       confetti({
         particleCount: 100,
@@ -680,11 +674,13 @@
       });
     }
 
+    // お祝いボタンを押したとき（クールダウン機能つき！）
     function fireConfettiManually() {
-      if (isConfettiCoolingDown) return;
+      if (isConfettiCoolingDown) return; // 連打中の場合は無視してバグを防ぐ！
 
       triggerConfetti();
 
+      // 3秒間ボタンを無効化（クールダウン）
       isConfettiCoolingDown = true;
       const btn = document.getElementById('confetti-btn');
       btn.classList.add('disabled');
@@ -729,7 +725,7 @@
               if (!appData.lists.some(l => l.id === appData.currentListId)) {
                 appData.currentListId = appData.lists[0]?.id || 1;
               }
-              previousPercentage = null;
+              previousPercentage = null; // ロード直後の自動お祝いを防止
               saveAppData();
               alert("ロードが完了しました！");
             }
@@ -777,7 +773,7 @@
 
     function switchList(id) {
       appData.currentListId = id;
-      previousPercentage = null;
+      previousPercentage = null; // ★移動時は null にして自動お祝いを防止！
       saveAppData();
     }
 
@@ -855,24 +851,6 @@
       const currentIndex = list.tasks.findIndex(t => t.id === currentTaskId);
       if (currentIndex === -1) return;
 
-      // Tabキーでインデント
-      if (event.key === 'Tab') {
-        event.preventDefault();
-        if (currentIndex > 0) {
-          const prevTask = list.tasks[currentIndex - 1];
-          if (!prevTask.isSeparator && !list.tasks[currentIndex].indented) {
-            list.tasks[currentIndex].indented = true;
-            saveAppData();
-            setTimeout(() => {
-              const input = document.querySelector(`input[data-task-id="${currentTaskId}"]`);
-              if (input) input.focus();
-            }, 10);
-          }
-        }
-        return;
-      }
-
-      // 十字キー移動
       if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
         const activeInputs = Array.from(document.querySelectorAll('.task-text'));
         const activeIndex = activeInputs.indexOf(event.target);
@@ -886,76 +864,34 @@
         return;
       }
 
-      // ★改良：Enterで新規タスク（カーソル位置で文字を2つに分割して新しいタスクを作る！）
       if (event.key === 'Enter') {
         event.preventDefault();
-        const inputEl = event.target;
-        const cursorPos = inputEl.selectionStart || 0;
-        const currentText = inputEl.value;
-
-        // 前半（カーソルより前）と後半（カーソルより後ろ）に文字を切り分ける
-        const textBefore = currentText.slice(0, cursorPos);
-        const textAfter = currentText.slice(inputEl.selectionEnd || cursorPos);
-
-        // 今のタスクのテキストを「前半」の文字に更新
-        list.tasks[currentIndex].text = textBefore;
-        inputEl.value = textBefore;
-
-        // すぐ下に「後半」の文字を入れた新しいタスクを作成！
         const newTaskId = Date.now();
         const currentIndented = list.tasks[currentIndex].indented || false;
         list.tasks.splice(currentIndex + 1, 0, {
           id: newTaskId,
-          text: textAfter,
+          text: '',
           completed: false,
           indented: currentIndented
         });
-        
         saveAppData();
         setTimeout(() => {
           const nextInput = document.querySelector(`input[data-task-id="${newTaskId}"]`);
-          if (nextInput) {
-            nextInput.focus();
-            nextInput.setSelectionRange(0, 0); // 新しい行の先頭にカーソルを合わせる
-          }
-        }, 10);
-      } 
-      // Backspace（カーソルが0文字目にあるときの処理）
-      else if (event.key === 'Backspace' && event.target.selectionStart === 0 && event.target.selectionEnd === 0) {
-        if (list.tasks[currentIndex].indented) {
-          event.preventDefault();
-          list.tasks[currentIndex].indented = false;
-          saveAppData();
+          if (nextInput) nextInput.focus();
+        }, 50);
+      } else if (event.key === 'Backspace' && event.target.value === '') {
+        event.preventDefault();
+        if (currentIndex > 0) {
+          const prevTaskId = list.tasks[currentIndex - 1].id;
+          deleteTask(currentTaskId);
           setTimeout(() => {
-            const input = document.querySelector(`input[data-task-id="${currentTaskId}"]`);
-            if (input) {
-              input.focus();
-              input.setSelectionRange(0, 0);
+            const prevInput = document.querySelector(`input[data-task-id="${prevTaskId}"]`);
+            if (prevInput) {
+              prevInput.focus();
+              prevInput.selectionStart = prevInput.selectionEnd = prevInput.value.length;
             }
-          }, 10);
-        } else if (currentIndex > 0) {
-          const prevTask = list.tasks[currentIndex - 1];
-          if (!prevTask.isSeparator) {
-            event.preventDefault();
-            const prevTextLength = prevTask.text.length;
-            const currentText = list.tasks[currentIndex].text || '';
-            
-            prevTask.text += currentText;
-            deleteTask(currentTaskId);
-            
-            setTimeout(() => {
-              const prevInput = document.querySelector(`input[data-task-id="${prevTask.id}"]`);
-              if (prevInput) {
-                prevInput.focus();
-                prevInput.setSelectionRange(prevTextLength, prevTextLength);
-              }
-            }, 10);
-          } else if (event.target.value === '') {
-            event.preventDefault();
-            deleteTask(currentTaskId);
-          }
-        } else if (event.target.value === '') {
-          event.preventDefault();
+          }, 50);
+        } else {
           deleteTask(currentTaskId);
         }
       }
@@ -1045,7 +981,6 @@
     function handleDragStart(event, id) {
       draggedItemId = id;
       dragStartX = event.clientX;
-      dragStartY = event.clientY;
       event.target.classList.add('dragging');
       event.dataTransfer.setData('text/plain', '');
     }
@@ -1059,51 +994,25 @@
       const toIndex = list.tasks.findIndex(t => t.id === targetId);
       if (fromIndex === -1 || toIndex === -1) return;
 
-      const movedItem = list.tasks[fromIndex];
-      let stateChanged = false;
-
-      const targetElement = event.currentTarget;
-      const rect = targetElement.getBoundingClientRect();
-      const offsetY = event.clientY - rect.top;
-      const isBottomHalf = offsetY > rect.height / 2;
-
-      let newIndex = toIndex;
-      if (fromIndex < toIndex && !isBottomHalf) {
-        newIndex = toIndex - 1;
-      } else if (fromIndex > toIndex && isBottomHalf) {
-        newIndex = toIndex + 1;
-      }
-
-      if (fromIndex !== newIndex) {
-        list.tasks.splice(fromIndex, 1);
-        list.tasks.splice(newIndex, 0, movedItem);
-        stateChanged = true;
-      }
+      const [movedItem] = list.tasks.splice(fromIndex, 1);
+      list.tasks.splice(toIndex, 0, movedItem);
 
       const diffX = event.clientX - dragStartX;
-      const currentIdx = list.tasks.indexOf(movedItem);
-      
-      if (diffX > 20) {
-        if (currentIdx > 0 && !list.tasks[currentIdx - 1].isSeparator && !movedItem.indented) {
+      if (toIndex > 0) {
+        if (diffX > 25) {
           movedItem.indented = true;
-          stateChanged = true;
-        }
-      } else if (diffX < -10) {
-        if (movedItem.indented) {
+        } else if (diffX < -10) {
           movedItem.indented = false;
-          stateChanged = true;
         }
+      } else {
+        movedItem.indented = false;
       }
 
-      if (stateChanged) {
-        renderMain(false);
-      }
+      renderMain(false);
     }
 
     function handleDragEnd(event) {
       event.target.classList.remove('dragging');
-      // ★ドラッグ終了時に必ずドラッグ許可をOFFに戻す
-      event.target.setAttribute('draggable', 'false');
       draggedItemId = null;
       saveAppData();
     }
@@ -1135,18 +1044,14 @@
 
         const li = document.createElement('li');
         li.className = `task-item ${task.completed ? 'completed' : ''} ${task.indented ? 'indented' : ''}`;
-        
-        // ★重要：普段は draggable="false" にしておくため、マウスで自由に文字を選択・ハイライトできます！
-        li.setAttribute('draggable', 'false');
+        li.setAttribute('draggable', 'true');
         li.ondragstart = (e) => handleDragStart(e, task.id);
         li.ondragover = (e) => handleDragOver(e, task.id);
         li.ondragend = (e) => handleDragEnd(e);
         
         if (task.isSeparator) {
           li.innerHTML = `
-            <span class="drag-handle" title="ここを持って移動"
-                  onmousedown="this.closest('.task-item').setAttribute('draggable', 'true')"
-                  onmouseup="this.closest('.task-item').setAttribute('draggable', 'false')">⋮⋮</span>
+            <span class="drag-handle" title="ドラッグで移動/右に引いてインデント">⋮⋮</span>
             <hr class="separator-line">
             <button class="delete-btn" onclick="deleteTask(${task.id})" title="削除">×</button>
           `;
@@ -1154,9 +1059,7 @@
         } else {
           totalTasksCount++;
           li.innerHTML = `
-            <span class="drag-handle" title="ここを持って移動"
-                  onmousedown="this.closest('.task-item').setAttribute('draggable', 'true')"
-                  onmouseup="this.closest('.task-item').setAttribute('draggable', 'false')">⋮⋮</span>
+            <span class="drag-handle" title="ドラッグで移動/右に引いてインデント">⋮⋮</span>
             <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})">
             <input type="text" class="task-text" data-task-id="${task.id}" value="${task.text}" 
                    oninput="updateTaskText(${task.id}, this.value)" 
@@ -1197,7 +1100,7 @@
       updateDashboard(totalTasksCount, completedCount);
     }
 
-    /* --- 進捗グラフ＆100%お祝い演出の更新 --- */
+    /* --- ★進捗グラフ＆100%お祝い演出の更新 --- */
     function updateDashboard(total, completed) {
       const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
       
@@ -1217,17 +1120,23 @@
       const offset = circumference - (percentage / 100) * circumference;
       circleBarEl.style.strokeDashoffset = offset;
 
+      // ★100%達成時の特別演出！
       if (percentage === 100 && total > 0) {
+        // 色をオレンジ（お祝いカラー）にチェンジ！
         linearBarEl.classList.add('celebrate');
         circleBarEl.classList.add('celebrate');
         circleTextEl.classList.add('celebrate');
         percentTextEl.classList.add('celebrate-text');
+
+        // お祝いボタンを表示
         confettiBtnEl.style.display = 'inline-block';
 
+        // ★修正：前回が null(移動直後) ではなく、実際に操作して100%に到達した瞬間だけ自動で紙吹雪！
         if (previousPercentage !== null && previousPercentage < 100) {
           triggerConfetti();
         }
       } else {
+        // 100%未満になったら通常カラー（青）に戻してお祝いボタンを隠す
         linearBarEl.classList.remove('celebrate');
         circleBarEl.classList.remove('celebrate');
         circleTextEl.classList.remove('celebrate');
@@ -1235,6 +1144,7 @@
         confettiBtnEl.style.display = 'none';
       }
 
+      // 現在の進捗を記憶しておく
       previousPercentage = percentage;
     }
   </script>
