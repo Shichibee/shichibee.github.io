@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>進捗ビジュアル Todoリスト</title>
   <link rel="icon" type="image/svg+xml" href="Taskfavicon.svg">
-  <!-- 紙吹雪ライブラリ -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
   <style>
     /* 全体のスタイル設定 */
     body {
@@ -68,19 +66,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-
-    /* 同期ステータスのバッジ */
-    .sync-status {
-      font-size: 12px;
-      color: #5f6368;
-      background-color: #e8eaed;
-      padding: 4px 8px;
-      border-radius: 12px;
-      margin-left: 10px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
 
     /* セーブ＆ロードボタンのスタイル */
@@ -415,7 +400,7 @@
       display: none !important;
     }
 
-    /* 余白を元の index1.html と完全に同一に保持 */
+    /* ★余白を元の index1.html と完全に同一に保持！ */
     .drag-handle {
       color: #b0b3b8;
       margin-right: 8px;
@@ -569,11 +554,9 @@
     <div class="header-left">
       <button class="hamburger-btn" onclick="toggleSidebar()" title="メインメニュー">≡</button>
       <div class="app-logo">
-        <span>✅</span>
-        <span>進捗ビジュアル Todo</span>
+      <span>✅</span>
+      <span>進捗ビジュアル Todo</span>
       </div>
-      <!-- クラウドとの接続状態を表示するバッジ -->
-      <div class="sync-status" id="sync-status">☁️ 接続準備中...</div>
     </div>
     <div class="header-right">
       <button class="action-btn" onclick="saveToFile()" title="データをファイルに保存">💾 セーブ</button>
@@ -643,23 +626,6 @@
   </div>
 
   <script>
-    /* =====================================================================
-       ★要注意：ここをあなたのプロジェクトの合言葉に書き換えてください！
-       ===================================================================== */
-    const firebaseConfig = {
-      apiKey: "AIzaSyBsB93uGUdiWlqVkEHUE-4Wd4dd9bYqtbs",
-      authDomain: "my-visual-todo-bc944.firebaseapp.com",
-      projectId: "my-visual-todo-bc944",
-      storageBucket: "my-visual-todo-bc944.firebasestorage.app",
-      messagingSenderId: "332163471068",
-      appId: "1:332163471068:web:8e36b91b742429447a0619"
-    };
-    /* ===================================================================== */
-
-    // Firebaseの起動
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
     let appData = {
       currentListId: 1,
       lists: []
@@ -672,56 +638,38 @@
     let previousPercentage = null;
     let isConfettiCoolingDown = false;
 
-    const defaultData = {
-      currentListId: 1,
-      lists: [
-        {
-          id: 1,
-          title: '〇〇の講義のタスク',
-          tasks: [
-            { id: 101, text: '第1回 課題レポート提出', completed: true, indented: false },
-            { id: 102, text: '第2回 講義スライドを読む', completed: false, indented: false },
-            { id: 104, isSeparator: true, completed: false, indented: false },
-            { id: 103, text: '中間テストの勉強（過去問解く）', completed: false, indented: true }
-          ]
-        }
-      ]
-    };
-
     window.onload = function() {
-      const statusEl = document.getElementById('sync-status');
-      
-      // ★同期開始！
-      db.collection("todos").doc("my-list-data").onSnapshot((doc) => {
-        if (doc.exists) {
-          appData = doc.data();
-          statusEl.innerText = '☁️ 同期完了';
-          statusEl.style.color = '#137333';
-          
-          if (!doc.metadata.hasPendingWrites) {
-            renderSidebar();
-            renderMain(false);
-          }
-        } else {
-          appData = defaultData;
-          saveAppData();
-        }
-      }, (error) => {
-        console.error("通信エラー:", error);
-        statusEl.innerText = '⚠️ エラー';
-      });
-    };
-
-    // 保存処理（クラウド送信）
-    function saveAppData() {
-      document.getElementById('sync-status').innerText = '⏳ 保存中...';
-      db.collection("todos").doc("my-list-data").set(appData)
-        .then(() => { document.getElementById('sync-status').innerText = '☁️ 同期完了'; })
-        .catch(err => { console.error(err); });
-
+      const savedData = localStorage.getItem('google_keep_multi_lists_v2');
+      if (savedData) {
+        appData = JSON.parse(savedData);
+      } else {
+        appData = {
+          currentListId: 1,
+          lists: [
+            {
+              id: 1,
+              title: '〇〇の講義のタスク',
+              tasks: [
+                { id: 101, text: '第1回 課題レポート提出', completed: true, indented: false },
+                { id: 102, text: '第2回 講義スライドを読む', completed: false, indented: false },
+                { id: 104, isSeparator: true, completed: false, indented: false },
+                { id: 103, text: '中間テストの勉強（過去問解く）', completed: false, indented: true }
+              ]
+            },
+            {
+              id: 2,
+              title: '△△の講義のタスク',
+              tasks: [
+                { id: 201, text: '教科書 P.20〜35を読む', completed: false, indented: false },
+                { id: 202, text: '小テスト準備', completed: false, indented: false }
+              ]
+            }
+          ]
+        };
+      }
       renderSidebar();
-      renderMain(false);
-    }
+      renderMain();
+    };
 
     /* --- 紙吹雪を舞わせる処理 --- */
     function triggerConfetti() {
@@ -776,14 +724,14 @@
         try {
           const loadedData = JSON.parse(e.target.result);
           if (loadedData && Array.isArray(loadedData.lists)) {
-            if (confirm("今のリストを上書きして、ファイルからロードしてクラウドに反映しますか？")) {
+            if (confirm("今のリストを上書きして、ファイルからロードしますか？")) {
               appData = loadedData;
               if (!appData.lists.some(l => l.id === appData.currentListId)) {
                 appData.currentListId = appData.lists[0]?.id || 1;
               }
               previousPercentage = null;
               saveAppData();
-              alert("ロードとクラウドへの同期が完了しました！");
+              alert("ロードが完了しました！");
             }
           } else {
             alert("エラー：正しいセーブファイルの形式ではありません。");
@@ -801,26 +749,10 @@
       document.getElementById('sidebar').classList.toggle('collapsed');
     }
 
-    // ★大進化：今までブラウザの中に保存していた処理を、クラウドの金庫への送信に置き換え！
     function saveAppData() {
-      const statusEl = document.getElementById('sync-status');
-      statusEl.innerText = '⏳ クラウドへ保存中...';
-      statusEl.style.color = '#e37400'; // 作業中のオレンジ色
-
-      // クラウドの金庫（doc）を上書き保存
-      db.collection("todos").doc("my-list-data").set(appData)
-        .then(() => {
-          statusEl.innerText = '☁️ クラウドと同期完了';
-          statusEl.style.color = '#137333';
-        })
-        .catch((error) => {
-          console.error("保存失敗:", error);
-          statusEl.innerText = '⚠️ 保存失敗';
-          statusEl.style.color = '#c5221f';
-        });
-
+      localStorage.setItem('google_keep_multi_lists_v2', JSON.stringify(appData));
       renderSidebar();
-      renderMain(false);
+      renderMain();
     }
 
     function getCurrentList() {
@@ -882,7 +814,8 @@
       const list = getCurrentList();
       if (list) {
         list.title = newTitle;
-        saveAppData();
+        localStorage.setItem('google_keep_multi_lists_v2', JSON.stringify(appData));
+        renderSidebar();
       }
     }
 
@@ -953,7 +886,7 @@
         return;
       }
 
-      // 行頭で左キー（←）：上の行の末尾へジャンプ
+      // ★追加：行頭で左キー（←）を押したら上の行の末尾へジャンプ！
       if (event.key === 'ArrowLeft' && event.target.selectionStart === 0 && event.target.selectionEnd === 0) {
         const activeInputs = Array.from(document.querySelectorAll('.task-text'));
         const activeIndex = activeInputs.indexOf(event.target);
@@ -962,12 +895,12 @@
           const prevInput = activeInputs[activeIndex - 1];
           prevInput.focus();
           const len = prevInput.value.length;
-          prevInput.setSelectionRange(len, len);
+          prevInput.setSelectionRange(len, len); // 上の行の末尾へカーソルを合わせる
         }
         return;
       }
 
-      // 行末で右キー（→）：下の行の行頭へジャンプ
+      // ★追加：行末で右キー（→）を押したら下の行の行頭へジャンプ！
       if (event.key === 'ArrowRight' && event.target.selectionStart === event.target.value.length && event.target.selectionEnd === event.target.value.length) {
         const activeInputs = Array.from(document.querySelectorAll('.task-text'));
         const activeIndex = activeInputs.indexOf(event.target);
@@ -975,7 +908,7 @@
           event.preventDefault();
           const nextInput = activeInputs[activeIndex + 1];
           nextInput.focus();
-          nextInput.setSelectionRange(0, 0);
+          nextInput.setSelectionRange(0, 0); // 下の行の先頭へカーソルを合わせる
         }
         return;
       }
@@ -1115,9 +1048,7 @@
       const task = list.tasks.find(t => t.id === id);
       if (task) {
         task.text = newText;
-        // 文字入力中は頻繁にクラウド通信させず、1秒後やカーソル移動のタイミングで保存する方がスムーズですが、
-        // 今回はシンプルにすぐ保存して干渉防止策（hasPendingWrites）で守っています！
-        saveAppData();
+        localStorage.setItem('google_keep_multi_lists_v2', JSON.stringify(appData));
       }
     }
 
@@ -1202,7 +1133,7 @@
 
     /* --- 画面描画 --- */
     function renderMain(save = true) {
-      if (save) saveAppData();
+      if (save) localStorage.setItem('google_keep_multi_lists_v2', JSON.stringify(appData));
       const list = getCurrentList();
       if (!list) return;
 
