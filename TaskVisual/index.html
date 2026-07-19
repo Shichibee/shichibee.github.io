@@ -400,15 +400,15 @@
       display: none !important;
     }
 
-    /* ★改良：チェックボタン横の「持ち手（⋮⋮）」を掴みやすくし、ここを押した時だけドラッグ可能に！ */
+    /* ★修正：余白を元の index1.html と完全に同一に戻しました！ */
     .drag-handle {
       color: #b0b3b8;
-      margin-right: 4px;
+      margin-right: 8px;
       cursor: grab;
       user-select: none;
       font-size: 16px;
       letter-spacing: -2px;
-      padding: 6px 8px; /* マウスで掴みやすいように広めの判定領域 */
+      padding: 0 4px;
       border-radius: 4px;
       flex-shrink: 0;
       transition: background-color 0.2s, color 0.2s;
@@ -886,22 +886,19 @@
         return;
       }
 
-      // ★改良：Enterで新規タスク（カーソル位置で文字を2つに分割して新しいタスクを作る！）
+      // Enterで新規タスク（カーソル位置で文字を2つに分割）
       if (event.key === 'Enter') {
         event.preventDefault();
         const inputEl = event.target;
         const cursorPos = inputEl.selectionStart || 0;
         const currentText = inputEl.value;
 
-        // 前半（カーソルより前）と後半（カーソルより後ろ）に文字を切り分ける
         const textBefore = currentText.slice(0, cursorPos);
         const textAfter = currentText.slice(inputEl.selectionEnd || cursorPos);
 
-        // 今のタスクのテキストを「前半」の文字に更新
         list.tasks[currentIndex].text = textBefore;
         inputEl.value = textBefore;
 
-        // すぐ下に「後半」の文字を入れた新しいタスクを作成！
         const newTaskId = Date.now();
         const currentIndented = list.tasks[currentIndex].indented || false;
         list.tasks.splice(currentIndex + 1, 0, {
@@ -916,7 +913,7 @@
           const nextInput = document.querySelector(`input[data-task-id="${newTaskId}"]`);
           if (nextInput) {
             nextInput.focus();
-            nextInput.setSelectionRange(0, 0); // 新しい行の先頭にカーソルを合わせる
+            nextInput.setSelectionRange(0, 0);
           }
         }, 10);
       } 
@@ -1102,7 +1099,6 @@
 
     function handleDragEnd(event) {
       event.target.classList.remove('dragging');
-      // ★ドラッグ終了時に必ずドラッグ許可をOFFに戻す
       event.target.setAttribute('draggable', 'false');
       draggedItemId = null;
       saveAppData();
@@ -1136,7 +1132,6 @@
         const li = document.createElement('li');
         li.className = `task-item ${task.completed ? 'completed' : ''} ${task.indented ? 'indented' : ''}`;
         
-        // ★重要：普段は draggable="false" にしておくため、マウスで自由に文字を選択・ハイライトできます！
         li.setAttribute('draggable', 'false');
         li.ondragstart = (e) => handleDragStart(e, task.id);
         li.ondragover = (e) => handleDragOver(e, task.id);
